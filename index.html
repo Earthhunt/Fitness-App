@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="description" content="AlphaFit - Dein Fitness-Coach: Trainingspläne, Übungen & Ernährungstracker">
+<title>AlphaFit</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a; --surface:#141414; --surface2:#1e1e1e; --border:#2a2a2a;
+  --text:#f0f0f0; --text2:#a0a0a0; --text3:#666;
+  --accent:#ff6b35; --accent2:#ff8c5a; --green:#4caf50; --blue:#2196f3;
+  --red:#f44336; --yellow:#ff9800; --purple:#9c27b0;
+  --radius:14px; --radius-sm:10px; --radius-xs:6px;
+  --shadow:0 2px 12px rgba(0,0,0,.4);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --nav-h:64px; --bottom-pad:env(safe-area-inset-bottom,8px);
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  font-family:var(--font); background:var(--bg); color:var(--text);
+  min-height:100dvh; overflow-x:hidden; -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased; padding-bottom:calc(var(--nav-h) + var(--bottom-pad) + 8px);
+}
+a{color:var(--accent);text-decoration:none}
+button,input,select,textarea{font:inherit;color:inherit;border:none;outline:none;background:none}
+button{touch-action:manipulation;cursor:pointer}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ===== NAVIGATION ===== */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:var(--surface);border-top:1px solid var(--border);
+  display:flex;padding-bottom:var(--bottom-pad);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:8px 4px;color:var(--text3);transition:color .2s;font-size:10px;
+  font-weight:600;letter-spacing:.3px;
+}
+.nav-btn.active{color:var(--accent)}
+.nav-btn svg{width:22px;height:22px}
+.nav-btn span{line-height:1}
+
+/* ===== HEADER ===== */
+.page-header{
+  padding:16px 16px 12px;position:sticky;top:0;z-index:50;
+  background:var(--bg);border-bottom:1px solid transparent;
+}
+.page-header.scrolled{border-bottom-color:var(--border)}
+.page-header h1{font-size:24px;font-weight:800;letter-spacing:-.5px}
+.page-header .subtitle{font-size:13px;color:var(--text2);margin-top:2px}
+
+/* ===== PAGES ===== */
+.page{display:none;padding:0 16px 16px}
+.page.active{display:block}
+.section-title{
+  font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+  color:var(--text2);margin:20px 0 10px;
+}
+
+/* ===== CARDS ===== */
+.card{
+  background:var(--surface);border-radius:var(--radius);padding:16px;
+  margin-bottom:12px;border:1px solid var(--border);transition:transform .15s,box-shadow .15s;
+}
+.card:active{transform:scale(.985);box-shadow:var(--shadow)}
+.card-row{display:flex;align-items:center;gap:12px}
+.card-icon{
+  width:48px;height:48px;border-radius:var(--radius-sm);display:flex;
+  align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.card-icon.calisthenics{background:#ff6b3522;color:var(--accent)}
+.card-icon.gym{background:#2196f322;color:var(--blue)}
+.card-icon.running{background:#4caf5022;color:var(--green)}
+.card-icon.food{background:#9c27b022;color:var(--purple)}
+.card-body{flex:1;min-width:0}
+.card-title{font-weight:700;font-size:15px}
+.card-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.card-arrow{color:var(--text3);flex-shrink:0}
+
+/* ===== BADGES ===== */
+.badge{
+  display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;
+  font-weight:600;letter-spacing:.3px;
+}
+.badge-green{background:#4caf5022;color:var(--green)}
+.badge-blue{background:#2196f322;color:var(--blue)}
+.badge-orange{background:#ff6b3522;color:var(--accent)}
+.badge-purple{background:#9c27b022;color:var(--purple)}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 20px;border-radius:var(--radius-sm);font-weight:700;font-size:14px;
+  transition:all .2s;letter-spacing:.2px;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:active{background:var(--accent2);transform:scale(.97)}
+.btn-outline{border:2px solid var(--border);color:var(--text)}
+.btn-outline:active{background:var(--surface2)}
+.btn-block{width:100%;justify-content:center}
+.btn-sm{padding:6px 14px;font-size:12px;border-radius:var(--radius-xs)}
+
+/* ===== TRAINING PLAN DETAIL ===== */
+.plan-view{display:none}
+.plan-view.open{display:block}
+.back-btn{
+  display:inline-flex;align-items:center;gap:4px;color:var(--accent);font-weight:600;
+  font-size:14px;margin-bottom:12px;padding:4px 0;
+}
+.exercise-item{
+  background:var(--surface2);border-radius:var(--radius-sm);padding:14px;
+  margin-bottom:8px;border-left:3px solid var(--accent);
+}
+.exercise-item.gym-ex{border-left-color:var(--blue)}
+.exercise-item.run-ex{border-left-color:var(--green)}
+.exercise-item.cal-ex{border-left-color:var(--accent)}
+.exercise-name{font-weight:700;font-size:14px}
+.exercise-detail{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
+.exercise-sets{
+  display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;
+}
+.set-badge{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:4px 10px;font-size:11px;color:var(--text2);
+}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);
+  display:none;align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:500px;
+  max-height:85dvh;overflow-y:auto;padding:20px 16px;padding-bottom:calc(20px + var(--bottom-pad));
+}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal h2{font-size:18px;font-weight:800;margin-bottom:16px}
+
+/* ===== INPUTS ===== */
+.input-group{margin-bottom:14px}
+.input-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.input-group input,.input-group select,.input-group textarea{
+  width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px;font-size:14px;color:var(--text);transition:border-color .2s;
+}
+.input-group input:focus,.input-group select:focus,.input-group textarea:focus{border-color:var(--accent)}
+.input-group textarea{resize:vertical;min-height:80px}
+
+/* ===== STATS ROW ===== */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:12px;text-align:center;
+}
+.stat-value{font-size:22px;font-weight:800;color:var(--accent)}
+.stat-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ===== FOOD LOG ===== */
+.food-log-item{
+  background:var(--surface2);border-radius:var(--radius-sm);padding:12px;
+  margin-bottom:6px;display:flex;align-items:center;gap:12px;
+}
+.food-log-macros{display:flex;gap:12px;font-size:11px;color:var(--text2)}
+.food-log-macros span{font-weight:700;color:var(--text)}
+
+/* ===== RECIPE CARD ===== */
+.recipe-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.recipe-macros{display:flex;gap:10px;margin-top:8px;font-size:12px}
+.recipe-macros span{font-weight:700}
+
+/* ===== CHARTS ===== */
+.chart-bar{
+  height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:6px;
+}
+.chart-bar-fill{height:100%;border-radius:4px;transition:width .3s}
+.chart-bar-fill.protein{background:var(--blue)}
+.chart-bar-fill.carbs{background:var(--yellow)}
+.chart-bar-fill.fat{background:var(--red)}
+.chart-bar-fill.calories{background:var(--accent)}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;
+  background:var(--green);color:#fff;padding:10px 24px;border-radius:20px;
+  font-weight:700;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.toast.show{opacity:1}
+
+/* ===== EMPTY STATE ===== */
+.empty-state{
+  text-align:center;padding:40px 20px;color:var(--text3);
+}
+.empty-state svg{opacity:.3;margin-bottom:12px}
+.empty-state p{font-size:14px}
+
+/* ===== RESPONSIVE ===== */
+@media(min-width:768px){
+  .page{padding:0 24px 16px;max-width:800px;margin:0 auto}
+  .page-header{max-width:800px;margin:0 auto;padding:20px 24px 14px}
+  .bottom-nav{max-width:800px;left:50%;transform:translateX(-50%);border-radius:20px 20px 0 0}
+  body{padding-bottom:calc(var(--nav-h) + 16px)}
+  .modal{border-radius:20px;margin:auto;max-height:70dvh}
+  .modal-overlay{align-items:center}
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeIn .3s ease-out}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.pulse{animation:pulse 1.5s infinite}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="foodModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>🍽️ Mahlzeit loggen</h2>
+    <div class="input-group"><label>Name</label><input id="foodName" placeholder="z.B. Hähnchen mit Reis"></div>
+    <div class="input-group"><label>Mahlzeit</label><select id="foodMeal"><option value="Frühstück">Frühstück</option><option value="Mittagessen">Mittagessen</option><option value="Abendessen">Abendessen</option><option value="Snack">Snack</option></select></div>
+    <div class="stats-row">
+      <div class="input-group"><label>Kalorien</label><input type="number" id="foodCal" placeholder="kcal" min="0"></div>
+      <div class="input-group"><label>Protein (g)</label><input type="number" id="foodProt" placeholder="g" min="0"></div>
+      <div class="input-group"><label>Carbs (g)</label><input type="number" id="foodCarb" placeholder="g" min="0"></div>
+    </div>
+    <div class="input-group"><label>Fett (g)</label><input type="number" id="foodFat" placeholder="g" min="0"></div>
+    <button class="btn btn-primary btn-block" onclick="logFood()">✅ Eintragen</button>
+    <button class="btn btn-outline btn-block" style="margin-top:8px" onclick="closeFoodModal()">Abbrechen</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="recipeModal">
+  <div class="modal" id="recipeModalContent">
+    <div class="modal-handle"></div>
+    <div id="recipeDetail"></div>
+    <button class="btn btn-outline btn-block" style="margin-top:12px" onclick="closeRecipeModal()">Schließen</button>
+  </div>
+</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" data-page="train"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/><circle cx="10" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="18" cy="6" r="1" fill="currentColor" stroke="none"/></svg><span>Training</span></button>
+  <button class="nav-btn" data-page="plans"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 3v18"/></svg><span>Pläne</span></button>
+  <button class="nav-btn" data-page="nutrition"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6 3"/></svg><span>Ernährung</span></button>
+  <button class="nav-btn" data-page="recipes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 1-6 6 6 6 0 0 1-6-6"/><path d="M6 4h12l1 4H5z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg><span>Rezepte</span></button>
+</nav>
+
+<!-- ===== PAGE: TRAINING (Home/Log) ===== -->
+<div class="page active" id="page-train">
+  <div class="page-header"><h1>🏋️ AlphaFit</h1><p class="subtitle">Heute, <span id="todayDate"></span></p></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value" id="statWorkouts">0</div><div class="stat-label">Workouts</div></div>
+    <div class="stat-card"><div class="stat-value" id="statStreak">0</div><div class="stat-label">🔥 Streak</div></div>
+    <div class="stat-card"><div class="stat-value" id="statMinutes">0</div><div class="stat-label">Minuten</div></div>
+  </div>
+
+  <div class="section-title">⚡ Quick-Start</div>
+  <div class="card" onclick="openPlan('cal-fullbody')">
+    <div class="card-row"><div class="card-icon calisthenics">🤸</div><div class="card-body"><div class="card-title">Calisthenics Full Body</div><div class="card-sub">Klimmzüge, Dips, Squats – 45 Min</div></div><div class="card-arrow">→</div></div>
+  </div>
+  <div class="card" onclick="openPlan('gym-ppl')">
+    <div class="card-row"><div class="card-icon gym">🏋️</div><div class="card-body"><div class="card-title">Push/Pull/Legs (Gym)</div><div class="card-sub">Klassischer 3er-Split – 60 Min</div></div><div class="card-arrow">→</div></div>
+  </div>
+  <div class="card" onclick="openPlan('run-hiit')">
+    <div class="card-row"><div class="card-icon running">🏃</div><div class="card-body"><div class="card-title">HIIT Intervall-Lauf</div><div class="card-sub">30/30 & 60/30 Sprints – 25 Min</div></div><div class="card-arrow">→</div></div>
+  </div>
+
+  <div class="section-title">📋 Heutiges Log</div>
+  <div id="todayLog"><div class="empty-state"><p>Noch kein Workout heute</p></div></div>
+</div>
+
+<!-- ===== PAGE: PLANS ===== -->
+<div class="page" id="page-plans">
+  <div class="page-header"><h1>📋 Trainingspläne</h1><p class="subtitle">Alle Pläne auf einen Blick</p></div>
+
+  <div class="section-title">🤸 Calisthenics</div>
+  <div class="card" onclick="openPlan('cal-fullbody')"><div class="card-row"><div class="card-icon calisthenics">🤸</div><div class="card-body"><div class="card-title">Full Body Routine</div><div class="card-sub">Ganzkörper mit Körpergewicht</div></div><span class="badge badge-orange">3x/Woche</span></div></div>
+  <div class="card" onclick="openPlan('cal-skill')"><div class="card-row"><div class="card-icon calisthenics">🎯</div><div class="card-body"><div class="card-title">Skill-Training</div><div class="card-sub">Muscle-Up, Handstand, Front Lever</div></div><span class="badge badge-orange">Skill</span></div></div>
+  <div class="card" onclick="openPlan('cal-pushpull')"><div class="card-row"><div class="card-icon calisthenics">💪</div><div class="card-body"><div class="card-title">Push/Pull Split</div><div class="card-sub">Oberkörper-Fokus Calisthenics</div></div><span class="badge badge-orange">4x/Woche</span></div></div>
+
+  <div class="section-title">🏋️ Gym</div>
+  <div class="card" onclick="openPlan('gym-ppl')"><div class="card-row"><div class="card-icon gym">🏋️</div><div class="card-body"><div class="card-title">Push / Pull / Legs</div><div class="card-sub">Klassischer 3er-Split</div></div><span class="badge badge-blue">6x/Woche</span></div></div>
+  <div class="card" onclick="openPlan('gym-upperlower')"><div class="card-row"><div class="card-icon gym">🔄</div><div class="card-body"><div class="card-title">Upper / Lower Split</div><div class="card-sub">Ober-/Unterkörper abwechselnd</div></div><span class="badge badge-blue">4x/Woche</span></div></div>
+  <div class="card" onclick="openPlan('gym-fullbody')"><div class="card-row"><div class="card-icon gym">🏋️</div><div class="card-body"><div class="card-title">Ganzkörper 5x5</div><div class="card-sub">Kraftaufbau mit Grundübungen</div></div><span class="badge badge-blue">3x/Woche</span></div></div>
+  <div class="card" onclick="openPlan('gym-hypertrophy')"><div class="card-row"><div class="card-icon gym">🎯</div><div class="card-body"><div class="card-title">Hypertrophie Bro-Split</div><div class="card-sub">Klassischer Muskelaufbau</div></div><span class="badge badge-blue">5x/Woche</span></div></div>
+
+  <div class="section-title">🏃 Laufen & Cardio</div>
+  <div class="card" onclick="openPlan('run-hiit')"><div class="card-row"><div class="card-icon running">🏃</div><div class="card-body"><div class="card-title">HIIT Sprints</div><div class="card-sub">30/30 & 60/30 Intervalle</div></div><span class="badge badge-green">20-25 Min</span></div></div>
+  <div class="card" onclick="openPlan('run-5k')"><div class="card-row"><div class="card-icon running">🎯</div><div class="card-body"><div class="card-title">5K Trainingsplan</div><div class="card-sub">4-Wochen-Plan für 5km</div></div><span class="badge badge-green">4 Wochen</span></div></div>
+  <div class="card" onclick="openPlan('run-intervall')"><div class="card-row"><div class="card-icon running">⏱️</div><div class="card-body"><div class="card-title">Intervall-Training</div><div class="card-sub">400m/800m Wiederholungen</div></div><span class="badge badge-green">30-40 Min</span></div></div>
+</div>
+
+<!-- ===== PLAN DETAIL VIEW ===== -->
+<div class="page" id="page-plan-detail">
+  <button class="back-btn" onclick="closePlan()">← Zurück zu Plänen</button>
+  <div id="planContent"></div>
+</div>
+
+<!-- ===== PAGE: NUTRITION TRACKER ===== -->
+<div class="page" id="page-nutrition">
+  <div class="page-header"><h1>🍎 Ernährung</h1><p class="subtitle" id="nutritionDate"></p></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value" id="nutCal">0</div><div class="stat-label">Kalorien</div></div>
+    <div class="stat-card"><div class="stat-value" id="nutProt">0g</div><div class="stat-label">Protein</div></div>
+    <div class="stat-card"><div class="stat-value" id="nutCarb">0g</div><div class="stat-label">Carbs</div></div>
+  </div>
+  <div style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:4px"><span>Fett: <b id="nutFat">0g</b></span><span>Ziel: ~2500 kcal</span></div>
+    <div class="chart-bar"><div class="chart-bar-fill calories" id="calBar" style="width:0%"></div></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button class="btn btn-primary" onclick="openFoodModal()" style="flex:1">➕ Mahlzeit loggen</button>
+    <button class="btn btn-outline btn-sm" onclick="clearTodayFood()">🗑️</button>
+  </div>
+  <div class="section-title">Heutige Mahlzeiten</div>
+  <div id="foodLogList"><div class="empty-state"><p>Noch nichts gegessen – logge deine erste Mahlzeit!</p></div></div>
+</div>
+
+<!-- ===== PAGE: RECIPES ===== -->
+<div class="page" id="page-recipes">
+  <div class="page-header"><h1>📖 Rezepte</h1><p class="subtitle">Einfach, proteinreich, lecker</p></div>
+  <div id="recipeList"></div>
+</div>
+
+<script>
+// ============================================
+// ALPHAFIT - COMPLETE APP LOGIC
+// ============================================
+
+// ---- DATA: TRAINING PLANS ----
+const plans = {
+  'cal-fullbody': {
+    title:'Calisthenics Full Body', icon:'🤸', type:'cal', duration:'45 Min', frequency:'3x/Woche',
+    warmup:'5 Min Seilspringen + Mobility',
+    exercises:[
+      {name:'Klimmzüge',sets:'4',reps:'8-12',rest:'90s',note:'Obergriff, schulterbreit'},
+      {name:'Dips',sets:'4',reps:'10-15',rest:'90s',note:'An Barren oder Stühlen'},
+      {name:'Bulgarian Split Squats',sets:'3',reps:'12/Bein',rest:'60s',note:'Hinteres Bein erhöht'},
+      {name:'Pike Push-Ups',sets:'3',reps:'8-12',rest:'90s',note:'Hüfte hoch, Richtung Handstand drücken'},
+      {name:'Australian Rows',sets:'3',reps:'12-15',rest:'60s',note:'An niedriger Stange/unter Tisch'},
+      {name:'Hanging Leg Raises',sets:'3',reps:'10-15',rest:'60s',note:'Langsam, kontrolliert'},
+    ],
+    cooldown:'5 Min Stretching: Schultern, Hüfte, Hamstrings'
+  },
+  'cal-skill': {
+    title:'Calisthenics Skill-Training', icon:'🎯', type:'cal', duration:'60 Min', frequency:'2-3x/Woche',
+    warmup:'10 Min Mobility: Handgelenke, Schultern, Hüfte + 3x30s Plank',
+    exercises:[
+      {name:'Muscle-Up Progression',sets:'5',reps:'3-5',rest:'120s',note:'Explosive Pull-Ups + Transition an Ringen'},
+      {name:'Handstand Hold (an Wand)',sets:'4',reps:'30-60s',rest:'90s',note:'Belly-to-Wall, Körperspannung'},
+      {name:'Front Lever Tuck Hold',sets:'4',reps:'10-20s',rest:'90s',note:'An Stange, Knie zur Brust'},
+      {name:'L-Sit (Paralletes)',sets:'4',reps:'15-30s',rest:'60s',note:'Beine gestreckt halten'},
+      {name:'Pseudo Planche Push-Ups',sets:'3',reps:'8-10',rest:'90s',note:'Hände nah an Hüfte, lean forward'},
+      {name:'Dragon Flag Negatives',sets:'3',reps:'3-5',rest:'90s',note:'Langsam absenken, 5s exzentrisch'},
+    ],
+    cooldown:'5 Min: Handgelenk-Stretches, Schulter-Dislocates'
+  },
+  'cal-pushpull': {
+    title:'Calisthenics Push/Pull Split', icon:'💪', type:'cal', duration:'50 Min', frequency:'4x/Woche',
+    warmup:'5 Min Jumping Jacks + Arm Circles',
+    exercises:[
+      {name:'[Push] Ring Dips',sets:'4',reps:'10-12',rest:'90s',note:'Volle ROM'},
+      {name:'[Push] Decline Push-Ups',sets:'3',reps:'15-20',rest:'60s',note:'Füße erhöht'},
+      {name:'[Push] Pike Push-Ups',sets:'3',reps:'8-10',rest:'90s',note:'Schulter-Fokus'},
+      {name:'[Push] Tricep Extensions (Band)',sets:'3',reps:'15',rest:'45s',note:'Overhead'},
+      {name:'[Pull] Weighted Pull-Ups',sets:'4',reps:'5-8',rest:'120s',note:'Zusatzgewicht falls möglich'},
+      {name:'[Pull] Ring Rows',sets:'3',reps:'12-15',rest:'60s',note:'Körper horizontal'},
+      {name:'[Pull] Face Pulls (Band)',sets:'3',reps:'15-20',rest:'45s',note:'Rear delts + Rotatoren'},
+      {name:'[Pull] Bicep Curls (Band)',sets:'3',reps:'12-15',rest:'45s',note:'Supinated'},
+    ],
+    cooldown:'5 Min Stretching'
+  },
+  'gym-ppl': {
+    title:'Push / Pull / Legs', icon:'🏋️', type:'gym', duration:'60 Min', frequency:'6x/Woche',
+    warmup:'5 Min Laufband + dynamisches Dehnen',
+    exercises:[
+      {name:'[Push] Bankdrücken',sets:'4',reps:'6-8',rest:'120s',note:'Langhantel, kontrolliert'},
+      {name:'[Push] Schrägbank KH',sets:'3',reps:'10-12',rest:'90s',note:'30° Winkel'},
+      {name:'[Push] Schulterdrücken',sets:'3',reps:'8-10',rest:'90s',note:'KH oder Langhantel'},
+      {name:'[Push] Seitheben',sets:'4',reps:'15-20',rest:'45s',note:'Leicht, hohe Wiederholungen'},
+      {name:'[Push] Trizeps Pushdown',sets:'3',reps:'12-15',rest:'45s',note:'Am Kabelzug'},
+      {name:'[Pull] Kreuzheben',sets:'4',reps:'5',rest:'180s',note:'Schwer, perfekte Form!'},
+      {name:'[Pull] Rudern vorgebeugt',sets:'4',reps:'8-10',rest:'90s',note:'Langhantel'},
+      {name:'[Pull] Latzug',sets:'3',reps:'10-12',rest:'60s',note:'Breiter Griff'},
+      {name:'[Pull] Face Pulls',sets:'3',reps:'15',rest:'45s',note:'Kabelzug auf Augenhöhe'},
+      {name:'[Legs] Kniebeugen',sets:'4',reps:'8-10',rest:'120s',note:'Ass to Grass'},
+      {name:'[Legs] Romanian Deadlift',sets:'3',reps:'10-12',rest:'90s',note:'Hamstrings'},
+      {name:'[Legs] Beinpresse',sets:'3',reps:'12-15',rest:'60s',note:'Tief, kontrolliert'},
+      {name:'[Legs] Wadenheben',sets:'4',reps:'15-20',rest:'45s',note:'Stehend'},
+    ],
+    cooldown:'5-10 Min Dehnen: Beine, Rücken, Brust'
+  },
+  'gym-upperlower': {
+    title:'Upper / Lower Split', icon:'🔄', type:'gym', duration:'55 Min', frequency:'4x/Woche',
+    warmup:'5 Min Rudern + Mobility',
+    exercises:[
+      {name:'[Upper] Bankdrücken',sets:'4',reps:'8-10',rest:'90s',note:'Langhantel'},
+      {name:'[Upper] Klimmzüge',sets:'4',reps:'8-12',rest:'90s',note:'Zusatzgewicht wenn nötig'},
+      {name:'[Upper] Schulterdrücken KH',sets:'3',reps:'10-12',rest:'60s',note:''},
+      {name:'[Upper] Rudern Kabel',sets:'3',reps:'12-15',rest:'60s',note:'Enger Griff'},
+      {name:'[Upper] Seitheben + Trizeps',sets:'3+3',reps:'15/12',rest:'45s',note:'Superset'},
+      {name:'[Lower] Kniebeugen',sets:'4',reps:'6-8',rest:'120s',note:'Schwer'},
+      {name:'[Lower] RDL',sets:'3',reps:'10-12',rest:'90s',note:''},
+      {name:'[Lower] Bulgarian Split Squats',sets:'3',reps:'10/Bein',rest:'60s',note:'KH in Händen'},
+      {name:'[Lower] Beinbeuger Maschine',sets:'3',reps:'12-15',rest:'45s',note:''},
+      {name:'[Lower] Wadenheben',sets:'4',reps:'20',rest:'45s',note:''},
+    ],
+    cooldown:'8 Min Ganzkörper-Stretching'
+  },
+  'gym-fullbody': {
+    title:'Ganzkörper 5x5', icon:'🏋️', type:'gym', duration:'50 Min', frequency:'3x/Woche',
+    warmup:'5 Min Laufband + 2x leichte Aufwärmsätze',
+    exercises:[
+      {name:'Kniebeugen',sets:'5',reps:'5',rest:'120s',note:'5x5 mit gleichem Gewicht'},
+      {name:'Bankdrücken',sets:'5',reps:'5',rest:'120s',note:'Langhantel'},
+      {name:'Kreuzheben',sets:'1',reps:'5',rest:'180s',note:'1x5 reicht nach Squats'},
+      {name:'Klimmzüge',sets:'3',reps:'8-10',rest:'90s',note:'Zusatzgewicht'},
+      {name:'Schulterdrücken',sets:'3',reps:'8',rest:'90s',note:'Stehend, Langhantel'},
+    ],
+    cooldown:'5 Min Foam Rolling + Stretching'
+  },
+  'gym-hypertrophy': {
+    title:'Hypertrophie Bro-Split', icon:'🎯', type:'gym', duration:'60-70 Min', frequency:'5x/Woche',
+    warmup:'5 Min Cardio + leichte Aufwärmsätze',
+    exercises:[
+      {name:'[Brust] Bankdrücken LH',sets:'4',reps:'8-12',rest:'90s',note:''},
+      {name:'[Brust] Schrägbank KH',sets:'3',reps:'10-15',rest:'60s',note:''},
+      {name:'[Brust] Flys am Kabel',sets:'3',reps:'15-20',rest:'45s',note:'Obere + untere'},
+      {name:'[Rücken] Kreuzheben',sets:'3',reps:'8-10',rest:'120s',note:''},
+      {name:'[Rücken] Latzug eng',sets:'3',reps:'10-12',rest:'60s',note:''},
+      {name:'[Rücken] Rudern Maschine',sets:'3',reps:'12-15',rest:'60s',note:''},
+      {name:'[Beine] Kniebeugen',sets:'4',reps:'10-12',rest:'90s',note:''},
+      {name:'[Beine] Beinpresse',sets:'4',reps:'12-15',rest:'60s',note:''},
+      {name:'[Schultern] Seitheben',sets:'4',reps:'15-20',rest:'45s',note:'Drop-Sets!'},
+      {name:'[Arme] Bizeps SZ + Trizeps',sets:'3+3',reps:'12/12',rest:'60s',note:'Superset'},
+    ],
+    cooldown:'10 Min Stretching'
+  },
+  'run-hiit': {
+    title:'HIIT Sprints', icon:'🏃', type:'run', duration:'20-25 Min', frequency:'2-3x/Woche',
+    warmup:'5 Min lockeres Joggen + Dynamisches Dehnen + 2x Strides (80%)',
+    exercises:[
+      {name:'30/30 Sprints',sets:'8',reps:'30s Sprint / 30s Pause',rest:'-',note:'90-95% max. Pace. Nicht joggen in Pause – gehen oder stehen.'},
+      {name:'Aktive Erholung',sets:'1',reps:'2 Min',rest:'-',note:'Lockers Gehen, tief atmen'},
+      {name:'60/30 Sprints',sets:'4',reps:'60s Sprint / 30s Pause',rest:'-',note:'85-90% max. Pace, Pace halten!'},
+      {name:'Cool Down Joggen',sets:'1',reps:'5 Min',rest:'-',note:'Ganz locker, Puls runterbringen'},
+    ],
+    cooldown:'5 Min Gehen + 5 Min Stretching (Waden, Hamstrings, Quads)'
+  },
+  'run-5k': {
+    title:'5K Trainingsplan (4 Wochen)', icon:'🎯', type:'run', duration:'variabel', frequency:'3-4x/Woche',
+    warmup:'Immer 5 Min lockeres Einlaufen vor jeder Einheit',
+    exercises:[
+      {name:'Woche 1 – Einheit 1',sets:'1',reps:'3km locker',rest:'-',note:'Ziel: Ankommen, Puls Zone 2-3'},
+      {name:'Woche 1 – Einheit 2',sets:'6',reps:'400m schnell / 200m locker',rest:'-',note:'Intervalle, ~80% Pace'},
+      {name:'Woche 1 – Einheit 3',sets:'1',reps:'4km locker',rest:'-',note:'Langer Lauf, Konversationstempo'},
+      {name:'Woche 2 – Einheit 1',sets:'1',reps:'3.5km Tempo',rest:'-',note:'~75% Pace, gleichmäßig'},
+      {name:'Woche 2 – Einheit 2',sets:'4',reps:'800m Tempo / 400m locker',rest:'-',note:'Tempo steigern'},
+      {name:'Woche 2 – Einheit 3',sets:'1',reps:'5km locker',rest:'-',note:'Erster 5K – nur ankommen!'},
+      {name:'Woche 3 – Einheit 1',sets:'1',reps:'4km progressiv',rest:'-',note:'Alle 1km etwas schneller'},
+      {name:'Woche 3 – Einheit 2',sets:'3',reps:'1km Tempo / 400m locker',rest:'-',note:'Kilometer-Pace finden'},
+      {name:'Woche 3 – Einheit 3',sets:'1',reps:'5km Tempo',rest:'-',note:'Ziel-Pace für Wettkampf testen'},
+      {name:'Woche 4 – Taper',sets:'1',reps:'3km locker + 3x200m',rest:'-',note:'Frische Beine!'},
+      {name:'🏁 WETTKAMPF: 5K!',sets:'1',reps:'5km ALL-OUT',rest:'-',note:'Gib alles! 🚀'},
+    ],
+    cooldown:'Nach jeder Einheit: 5 Min Auslaufen + Stretching'
+  },
+  'run-intervall': {
+    title:'Bahnen-Intervall Training', icon:'⏱️', type:'run', duration:'30-40 Min', frequency:'2x/Woche',
+    warmup:'10 Min Einlaufen + 4x Strides à 80m + Dynamisches Dehnen',
+    exercises:[
+      {name:'400m Wiederholungen',sets:'6-8',reps:'400m @ 85% / 200m locker',rest:'-',note:'Pace konstant halten über alle Wiederholungen'},
+      {name:'Aktive Pause',sets:'1',reps:'3 Min',rest:'-',note:'Lockers Traben, Wasser'},
+      {name:'200m Sprints',sets:'4-6',reps:'200m @ 95% / 200m sehr locker',rest:'-',note:'Qualität vor Quantität!'},
+    ],
+    cooldown:'10 Min Auslaufen + 5 Min Stretching'
+  }
+};
+
+// ---- DATA: RECIPES ----
+const recipes = [
+  {
+    id:'r1',title:'Protein-Porridge',meal:'Frühstück',time:'10 Min',cals:520,protein:35,carbs:65,fat:12,
+    tags:['High Protein','Schnell','Vegetarisch'],
+    ingredients:['80g Haferflocken','30g Whey Protein (Vanille)','250ml Milch','1 Banane','1 EL Erdnussbutter','Zimt'],
+    steps:['Haferflocken mit Milch in Topf geben','Bei mittlerer Hitze 5 Min köcheln, rühren','Whey einrühren','Mit Bananenscheiben & Erdnussbutter toppen','Zimt drüber → fertig!']
+  },
+  {
+    id:'r2',title:'Hähnchen-Reis-Bowl',meal:'Mittagessen',time:'25 Min',cals:650,protein:52,carbs:62,fat:16,
+    tags:['High Protein','Meal Prep','Klassiker'],
+    ingredients:['200g Hähnchenbrust','150g Jasminreis (roh)','200g Brokkoli','1 EL Olivenöl','Salz, Pfeffer, Paprika','Sojasauce'],
+    steps:['Reis nach Packung kochen','Hähnchen würfeln, mit Öl scharf anbraten (6-7 Min)','Brokkoli dämpfen oder blanchieren','Alles in Bowl anrichten','Mit Sojasauce & Gewürzen abschmecken']
+  },
+  {
+    id:'r3',title:'Protein-Pancakes',meal:'Frühstück',time:'15 Min',cals:440,protein:38,carbs:48,fat:10,
+    tags:['High Protein','Süß','Pre/Post-Workout'],
+    ingredients:['2 Eier','50g Haferflocken (gemahlen)','30g Whey (Vanille/Schoko)','1 Banane','50ml Milch','1 TL Backpulver'],
+    steps:['Alle Zutaten in Mixer geben','Zu glattem Teig mixen','In beschichteter Pfanne ohne Öl ausbacken','Kleine Pancakes formen, bei mittlerer Hitze 2-3 Min pro Seite','Mit Beeren & fettarmem Joghurt servieren']
+  },
+  {
+    id:'r4',title:'Thunfisch-Wrap',meal:'Mittagessen',time:'10 Min',cals:480,protein:42,carbs:38,fat:14,
+    tags:['Schnell','High Protein','To-Go'],
+    ingredients:['1 Dose Thunfisch (im eigenen Saft)','1 Vollkorn-Wrap','50g körniger Frischkäse','Salat, Tomate, Gurke','Salz, Pfeffer, Zitronensaft'],
+    steps:['Thunfisch abtropfen','Mit Frischkäse, Gewürzen & Zitronensaft mischen','Wrap belegen: Salat, Thunfisch-Mix, Gemüse','Fest rollen, halbieren → fertig!']
+  },
+  {
+    id:'r5',title:'Shakshuka',meal:'Abendessen',time:'25 Min',cals:390,protein:24,carbs:28,fat:18,
+    tags:['Vegetarisch','Warm','Einfach'],
+    ingredients:['3 Eier','1 Dose gehackte Tomaten','1 Zwiebel','1 Paprika','1 TL Kreuzkümmel','Feta (optional)'],
+    steps:['Zwiebel & Paprika würfeln, in Pfanne anbraten','Tomaten + Gewürze dazu, 10 Min köcheln','3 Mulden formen, Eier reinschlagen','Deckel drauf, 5-7 Min stocken lassen','Mit Feta & Brot servieren']
+  },
+  {
+    id:'r6',title:'Magerquark-Bowl',meal:'Snack',time:'5 Min',cals:320,protein:40,carbs:28,fat:6,
+    tags:['High Protein','Schnell','Snack'],
+    ingredients:['250g Magerquark','100g gefrorene Beeren','20g Mandeln','1 TL Honig','1 TL Leinsamen'],
+    steps:['Quark in Schüssel geben','Beeren auftauen lassen (oder mikrowelle 30s)','Alles toppen mit Mandeln, Honig, Leinsamen','Genießen!']
+  },
+  {
+    id:'r7',title:'Rinderhack-Süßkartoffel-Pfanne',meal:'Abendessen',time:'30 Min',cals:580,protein:45,carbs:50,fat:20,
+    tags:['High Protein','Warm','Meal Prep'],
+    ingredients:['200g Rinderhack (5% Fett)','1 große Süßkartoffel','1 Zwiebel','1 Paprika','Kidneybohnen (optional)','Gewürze: Paprika, Kreuzkümmel, Chili'],
+    steps:['Süßkartoffel würfeln, in Pfanne mit wenig Öl anbraten (~10 Min)','Zwiebel & Paprika dazu','Rinderhack separat krümelig braten','Alles vereinen, würzen','5 Min ziehen lassen → done!']
+  },
+  {
+    id:'r8',title:'Overnight Oats',meal:'Frühstück',time:'5 Min (+über Nacht)',cals:450,protein:30,carbs:58,fat:14,
+    tags:['Meal Prep','Süß','Schnell'],
+    ingredients:['60g Haferflocken','20g Whey Protein','200ml Milch','1 EL Chiasamen','1 TL Honig','TK-Beeren'],
+    steps:['Alle Zutaten in Glas/Schüssel mischen','Über Nacht in Kühlschrank','Morgens umrühren, Beeren drauf','Kalt genießen oder 1 Min mikrowelle']
+  }
+];
+
+// ---- STATE ----
+let currentPlan = null;
+let foodLog = JSON.parse(localStorage.getItem('alphafit_food')||'{}');
+let workoutLog = JSON.parse(localStorage.getItem('alphafit_workouts')||'{}');
+let streak = parseInt(localStorage.getItem('alphafit_streak')||'0');
+let lastWorkoutDate = localStorage.getItem('alphafit_lastDate')||'';
+
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){ return new Date(d).toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'}); }
+
+// ---- TOAST ----
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// ---- NAVIGATION ----
+document.querySelectorAll('.nav-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const pn=b.dataset.page;
+    if(pn==='train') document.getElementById('page-train').classList.add('active');
+    else if(pn==='plans') document.getElementById('page-plans').classList.add('active');
+    else if(pn==='nutrition') document.getElementById('page-nutrition').classList.add('active');
+    else if(pn==='recipes') document.getElementById('page-recipes').classList.add('active');
+    document.getElementById('page-plan-detail').classList.remove('active');
+    refreshAll();
+  });
+});
+
+function switchTab(tab){
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.toggle('active',b.dataset.page===tab);
+  });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  if(tab==='nutrition') document.getElementById('page-nutrition').classList.add('active');
+  else if(tab==='recipes') document.getElementById('page-recipes').classList.add('active');
+  document.getElementById('page-plan-detail').classList.remove('active');
+  refreshAll();
+}
+
+// ---- PLAN NAVIGATION ----
+function openPlan(id){
+  const plan = plans[id];
+  if(!plan) return;
+  currentPlan = id;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-plan-detail').classList.add('active');
+
+  let html = `<h1 style="font-size:22px;font-weight:800;margin-bottom:4px">${plan.icon} ${plan.title}</h1>`;
+  html += `<p style="color:var(--text2);margin-bottom:4px">⏱️ ${plan.duration} · ${plan.frequency}</p>`;
+  html += `<p style="color:var(--accent);font-weight:600;font-size:13px;margin-bottom:16px">🔥 Warm-Up: ${plan.warmup}</p>`;
+
+  html += `<div class="section-title">Übungen</div>`;
+  plan.exercises.forEach((ex,i)=>{
+    const cls = plan.type==='gym'?'gym-ex':plan.type==='run'?'run-ex':'cal-ex';
+    html += `<div class="exercise-item ${cls}">
+      <div class="exercise-name">${i+1}. ${ex.name}</div>
+      <div class="exercise-detail">${ex.sets} × ${ex.reps} · Pause: ${ex.rest}</div>
+      ${ex.note?`<div class="exercise-detail" style="color:var(--text2);font-style:italic">💡 ${ex.note}</div>`:''}
+    </div>`;
+  });
+
+  html += `<p style="color:var(--green);font-weight:600;font-size:13px;margin-top:16px">🧘 Cool-Down: ${plan.cooldown}</p>`;
+  html += `<button class="btn btn-primary btn-block" style="margin-top:20px" onclick="completeWorkout('${id}')">✅ Workout absolvieren!</button>`;
+
+  document.getElementById('planContent').innerHTML = html;
+  window.scrollTo(0,0);
+}
+
+function closePlan(){
+  currentPlan = null;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-plans').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page==='plans'));
+  window.scrollTo(0,0);
+}
+
+// ---- WORKOUT COMPLETION ----
+function completeWorkout(id){
+  const plan = plans[id];
+  const d = today();
+  if(!workoutLog[d]) workoutLog[d]=[];
+  workoutLog[d].push({plan:id,title:plan.title,time:new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})});
+  localStorage.setItem('alphafit_workouts',JSON.stringify(workoutLog));
+
+  // Streak
+  if(lastWorkoutDate !== d){
+    const yesterday = new Date();yesterday.setDate(yesterday.getDate()-1);
+    const yStr = yesterday.toISOString().slice(0,10);
+    if(lastWorkoutDate === yStr){ streak++; }
+    else if(lastWorkoutDate !== d){ streak = 1; }
+    lastWorkoutDate = d;
+    localStorage.setItem('alphafit_streak',streak);
+    localStorage.setItem('alphafit_lastDate',lastWorkoutDate);
+  }
+
+  toast(`🔥 ${plan.title} absolviert!`);
+  refreshAll();
+}
+
+// ---- FOOD LOGGING ----
+function openFoodModal(){ document.getElementById('foodModal').classList.add('open'); }
+function closeFoodModal(){
+  document.getElementById('foodModal').classList.remove('open');
+  ['foodName','foodCal','foodProt','foodCarb','foodFat'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('foodMeal').value='Frühstück';
+}
+function logFood(){
+  const name=document.getElementById('foodName').value.trim();
+  const meal=document.getElementById('foodMeal').value;
+  const cal=parseInt(document.getElementById('foodCal').value)||0;
+  const prot=parseInt(document.getElementById('foodProt').value)||0;
+  const carb=parseInt(document.getElementById('foodCarb').value)||0;
+  const fat=parseInt(document.getElementById('foodFat').value)||0;
+  if(!name || cal===0) return toast('Bitte Name & Kalorien angeben!');
+
+  const d=today();
+  if(!foodLog[d]) foodLog[d]=[];
+  foodLog[d].push({name,meal,cal,prot,carb,fat,time:new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})});
+  localStorage.setItem('alphafit_food',JSON.stringify(foodLog));
+  closeFoodModal();
+  toast('🍽️ Gemerkt!');
+  refreshAll();
+}
+
+function clearTodayFood(){
+  if(!confirm('Heutige Einträge wirklich löschen?')) return;
+  delete foodLog[today()];
+  localStorage.setItem('alphafit_food',JSON.stringify(foodLog));
+  refreshAll();
+  toast('🗑️ Gelöscht');
+}
+
+// ---- RECIPE MODAL ----
+function openRecipe(id){
+  const r=recipes.find(x=>x.id===id);
+  if(!r) return;
+  let html = `<h1 style="font-size:20px;font-weight:800">${r.title}</h1>`;
+  html += `<p style="color:var(--text2);margin-bottom:4px">🍽️ ${r.meal} · ⏱️ ${r.time}</p>`;
+  html += `<div class="recipe-tags">${r.tags.map(t=>`<span class="badge badge-purple">${t}</span>`).join('')}</div>`;
+  html += `<div class="recipe-macros" style="margin-top:12px">`;
+  html += `<span>🔥 <b>${r.cals} kcal</b></span>`;
+  html += `<span>🥩 <b>${r.protein}g</b> Protein</span>`;
+  html += `<span>🍞 <b>${r.carbs}g</b> Carbs</span>`;
+  html += `<span>🧈 <b>${r.fat}g</b> Fett</span>`;
+  html += `</div>`;
+  html += `<div class="section-title" style="margin-top:16px">📝 Zutaten</div><ul style="font-size:14px;line-height:2;padding-left:18px">${r.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul>`;
+  html += `<div class="section-title">👨‍🍳 Zubereitung</div><ol style="font-size:14px;line-height:2;padding-left:18px">${r.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`;
+  html += `<button class="btn btn-primary btn-block" style="margin-top:12px" onclick="logRecipe('${r.id}')">📋 Als Mahlzeit loggen</button>`;
+  document.getElementById('recipeDetail').innerHTML = html;
+  document.getElementById('recipeModal').classList.add('open');
+}
+function closeRecipeModal(){ document.getElementById('recipeModal').classList.remove('open'); }
+function logRecipe(id){
+  const r=recipes.find(x=>x.id===id);
+  if(!r) return;
+  const d=today();
+  if(!foodLog[d]) foodLog[d]=[];
+  foodLog[d].push({name:`🍳 ${r.title}`,meal:r.meal,cal:r.cals,prot:r.protein,carb:r.carbs,fat:r.fat,time:new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})});
+  localStorage.setItem('alphafit_food',JSON.stringify(foodLog));
+  closeRecipeModal();
+  toast('📋 Rezept geloggt!');
+  refreshAll();
+}
+
+// ---- RENDER FUNCTIONS ----
+function renderTodayLog(){
+  const d=today();
+  const wods=workoutLog[d]||[];
+  const container=document.getElementById('todayLog');
+  if(wods.length===0){ container.innerHTML='<div class="empty-state"><p>Noch kein Workout heute – wähle einen Plan!</p></div>';return; }
+  container.innerHTML=wods.map(w=>`<div class="food-log-item"><span style="font-size:18px">✅</span><div style="flex:1"><b>${w.title}</b><br><span style="font-size:11px;color:var(--text2)">${w.time}</span></div></div>`).join('');
+}
+
+function renderFoodLog(){
+  const d=today();
+  const items=foodLog[d]||[];
+  const container=document.getElementById('foodLogList');
+  if(items.length===0){ container.innerHTML='<div class="empty-state"><p>Noch nichts gegessen – logge deine erste Mahlzeit!</p></div>'; }
+  else {
+    container.innerHTML=items.map((f,i)=>`<div class="food-log-item">
+      <span style="font-size:18px">${f.meal==='Frühstück'?'🌅':f.meal==='Mittagessen'?'☀️':f.meal==='Abendessen'?'🌙':'🍿'}</span>
+      <div style="flex:1"><b>${f.name}</b><br><span style="font-size:11px;color:var(--text2)">${f.time} · ${f.meal}</span></div>
+      <div style="text-align:right"><b>${f.cal} kcal</b><br><span style="font-size:10px;color:var(--text2)">P:${f.prot}g C:${f.carb}g F:${f.fat}g</span></div>
+    </div>`).join('');
+  }
+
+  // Totals
+  const totalCal = items.reduce((s,f)=>s+f.cal,0);
+  const totalProt = items.reduce((s,f)=>s+f.prot,0);
+  const totalCarb = items.reduce((s,f)=>s+f.carb,0);
+  const totalFat = items.reduce((s,f)=>s+f.fat,0);
+
+  document.getElementById('nutCal').textContent=totalCal;
+  document.getElementById('nutProt').textContent=totalProt+'g';
+  document.getElementById('nutCarb').textContent=totalCarb+'g';
+  document.getElementById('nutFat').textContent=totalFat+'g';
+  document.getElementById('calBar').style.width=Math.min(100,(totalCal/2500)*100)+'%';
+  document.getElementById('nutritionDate').textContent=fmtDate(today());
+}
+
+function renderRecipes(){
+  const container=document.getElementById('recipeList');
+  container.innerHTML=recipes.map(r=>`
+    <div class="card" onclick="openRecipe('${r.id}')">
+      <div class="card-row">
+        <div class="card-icon food">🍳</div>
+        <div class="card-body">
+          <div class="card-title">${r.title}</div>
+          <div class="card-sub">${r.meal} · ⏱️ ${r.time}</div>
+          <div class="recipe-tags">${r.tags.map(t=>`<span class="badge badge-purple">${t}</span>`).join('')}</div>
+          <div class="recipe-macros">
+            <span>🔥 <b>${r.cals}</b> kcal</span>
+            <span>🥩 <b>${r.protein}g</b> P</span>
+            <span>🍞 <b>${r.carbs}g</b> C</span>
+            <span>🧈 <b>${r.fat}g</b> F</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStats(){
+  const d=today();
+  const wods=workoutLog[d]||[];
+  document.getElementById('statWorkouts').textContent=wods.length;
+  document.getElementById('statStreak').textContent=streak;
+  document.getElementById('todayDate').textContent=fmtDate(d);
+
+  // Count all workouts
+  let total=0;
+  Object.values(workoutLog).forEach(arr=>total+=arr.length);
+  document.getElementById('statMinutes').textContent=total*45; // rough estimate
+}
+
+function refreshAll(){
+  renderTodayLog();
+  renderFoodLog();
+  renderRecipes();
+  renderStats();
+
+  // Check streak
+  const d=today();
+  if(lastWorkoutDate && lastWorkoutDate !== d){
+    const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
+    if(lastWorkoutDate !== yesterday.toISOString().slice(0,10) && lastWorkoutDate !== d){
+      streak=0;localStorage.setItem('alphafit_streak','0');
+      document.getElementById('statStreak').textContent='0';
+    }
+  }
+}
+
+// ---- MODAL CLICK OUTSIDE ----
+document.getElementById('foodModal').addEventListener('click',function(e){if(e.target===this)closeFoodModal();});
+document.getElementById('recipeModal').addEventListener('click',function(e){if(e.target===this)closeRecipeModal();});
+
+// ---- INIT ----
+refreshAll();
+
+// ---- SERVICE WORKER REGISTRATION ----
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"1954b47c125f43f8b4338b3c4f804e4f","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a02eade07fc5c6e7',t:'MTc3OTk4NjE5Ng=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

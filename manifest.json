@@ -1,0 +1,25 @@
+{
+  "name": "AlphaFit - Trainingspläne & Ernährung",
+  "short_name": "AlphaFit",
+  "description": "Dein persönlicher Fitness-Coach mit Trainingsplänen, Übungsbibliothek und Ernährungstracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#ff6b35",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["fitness", "health", "sports"]
+}
