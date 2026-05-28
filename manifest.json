@@ -1,15 +1,1 @@
-{
-  "name": "AlphaFit - Bodyweight Coach",
-  "short_name": "AlphaFit",
-  "description": "Deutsch/English Fitness-App mit Bodyweight-Workouts, Rezepten und Ernährungstracker",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#f6efe3",
-  "theme_color": "#d58a46",
-  "orientation": "any",
-  "icons": [
-    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
-  ],
-  "categories": ["fitness", "health", "sports", "food"]
-}
+{"error":"Object not found: cas/users/019c45fe-d49f-7cb5-a300-5cf73f09cdbc/888fqprakphbZI7rjNh9fXkTPUr4JXK86JenjuZ_Mzs"}
